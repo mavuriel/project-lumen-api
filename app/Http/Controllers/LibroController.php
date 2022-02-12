@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Libro;
+use Illuminate\Http\Request;
 
 class LibroController extends Controller
 {
@@ -10,5 +11,17 @@ class LibroController extends Controller
         $datosLibro = Libro::all();
 
         return response()->json($datosLibro);
+    }
+
+    public function guardar(Request $req)
+    {
+        $datosLibro = new Libro;
+
+        $datosLibro->titulo = $req->titulo;
+        $datosLibro->image = $req->image;
+
+        $datosLibro->save();
+
+        return response()->json($req);
     }
 }
