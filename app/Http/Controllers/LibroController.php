@@ -65,4 +65,48 @@ class LibroController extends Controller
 
         return response()->json($respuesta);
     }
+
+    public function actualizar(Request $req, $id)
+    {
+        $datosLibro = Libro::find($id);
+
+        if ($req->hasFile('image')) {
+
+            if ($datosLibro) {
+                $rutaArchivo = base_path('public') . $datosLibro->image;
+
+                if (file_exists($rutaArchivo)) {
+                    unlink($rutaArchivo);
+                }
+
+                $datosLibro->delete();
+
+                $respuesta = [
+                    'status' => 'ok',
+                    'message' => 'Libro borrado',
+                ];
+            }
+
+            $nombreArchivoOriginal = $req->file('image')->getClientOriginalName();
+
+            $nuevoNombreArchivo = Carbon::now()->timestamp . "_" . $nombreArchivoOriginal;
+
+            $carpetaDestino = "./upload/";
+
+            $req->file('image')->move($carpetaDestino, $nuevoNombreArchivo);
+
+            $datosLibro->image = ltrim($carpetaDestino, '.') . $nuevoNombreArchivo;
+
+            $datosLibro->save();
+
+        }
+
+        if ($req->input('titulo')) {
+            $datosLibro->titulo = $req->input('titulo');
+        }
+
+        $datosLibro->save();
+
+        return response()->json(['Datos actualizados', $respuesta]);
+    }
 }
