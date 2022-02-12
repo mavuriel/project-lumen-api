@@ -2,6 +2,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Libro;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class LibroController extends Controller
@@ -17,11 +18,22 @@ class LibroController extends Controller
     {
         $datosLibro = new Libro;
 
-        $datosLibro->titulo = $req->titulo;
-        $datosLibro->image = $req->image;
+        if ($req->hasFile('image')) {
+            $nombreArchivoOriginal = $req->file('image')->getClientOriginalName();
 
-        $datosLibro->save();
+            $nuevoNombreArchivo = Carbon::now()->timestamp . "_" . $nombreArchivoOriginal;
 
-        return response()->json($req);
+            $carpetaDestino = "./upload/";
+
+            $req->file('image')->move($carpetaDestino, $nuevoNombreArchivo);
+
+            $datosLibro->titulo = $req->titulo;
+            $datosLibro->image = ltrim($carpetaDestino, '.') . $nuevoNombreArchivo;
+
+            $datosLibro->save();
+
+        }
+
+        return response()->json($nuevoNombreArchivo);
     }
 }
